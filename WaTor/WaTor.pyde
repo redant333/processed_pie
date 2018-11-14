@@ -438,6 +438,7 @@ STATUS_PANEL_FONT_SIZE = 15
 STATUS_PANEL_UPDATE_INTERVAL = 1
 
 # Settings for saving the data
+DRAW_STATUS_PANEL = True
 SAVE_FRAMES = False
 SAVE_FRAMES_PATH = "frames/frame_######.png"
 PRINT_STATS = False
@@ -511,8 +512,10 @@ def draw():
     background(0)
 
     world.draw(0, 0)
-    statusPanel.update()
-    statusPanel.draw()
+
+    if DRAW_STATUS_PANEL:
+        statusPanel.update()
+        statusPanel.draw()
     
     if SAVE_FRAMES:
         saveFrame(SAVE_FRAMES_PATH)
