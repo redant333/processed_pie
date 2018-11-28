@@ -21,7 +21,16 @@ SAND_COLOR = color(244, 226, 65)
 CAMERA_X = 0
 CAMERA_Y = -500
 CAMERA_Z = 500
-ROTATION_SPEED = 0.01
+
+FPS = 30
+ROTATION_SPEED = TWO_PI / (13 * FPS)
+
+###################################################
+# Video exporting settings
+###################################################
+SAVE_FRAMES = False
+SAVE_FRAMES_PATH = "frames_{}_{}/frame_######.png".format(
+    RANDOM_SEED, PERLIN_SEED)
 
 ###################################################
 # Generated terrain size and precision
@@ -37,15 +46,18 @@ PRECISION = 80
 ###################################################
 HORIZONTAL_POINTS = PRECISION
 # Vertical size of generated terrain (in precision points)
-VERTICAL_POINTS = floor(random(HORIZONTAL_POINTS * 0.5, HORIZONTAL_POINTS * 0.8))
+VERTICAL_POINTS = floor(
+    random(HORIZONTAL_POINTS * 0.5, HORIZONTAL_POINTS * 0.8))
 # Water height (in precision points)
-WATER_LEVEL_POINTS = floor(random(VERTICAL_POINTS * 0.3, VERTICAL_POINTS * 0.6))
+WATER_LEVEL_POINTS = floor(
+    random(VERTICAL_POINTS * 0.3, VERTICAL_POINTS * 0.6))
 # Height at which stone color is used instead of plant (in precision points)
-STONE_LEVEL_POINTS = floor(random(VERTICAL_POINTS * 0.65, VERTICAL_POINTS * 0.8))
+STONE_LEVEL_POINTS = floor(
+    random(VERTICAL_POINTS * 0.65, VERTICAL_POINTS * 0.8))
 
 # Precision at which random(0.02, 0.05) gives reasonably good results
 REFERENCE_PRECISION = 80
-# Step used in random generation of terrain. 
+# Step used in random generation of terrain.
 # Corrected for potential change of precision
 PERLIN_STEP = random(0.02, 0.05) * REFERENCE_PRECISION / PRECISION
 
@@ -54,7 +66,7 @@ POINT_DISTANCE = TERRAIN_SIZE / (PRECISION - 1)
 # STONE_LEVEL_POINTS converted to pixels
 STONE_LEVEL = STONE_LEVEL_POINTS * POINT_DISTANCE
 # WATER_LEVEL_POINTS converted to pixels and lowered by half of
-# point distance. This is done to prevent having parallel water 
+# point distance. This is done to prevent having parallel water
 # and land which causes visual glitches
 WATER_LEVEL = WATER_LEVEL_POINTS * POINT_DISTANCE - POINT_DISTANCE/2
 
@@ -168,9 +180,11 @@ terrain = None
 terrain_sides = None
 water = None
 
+
 def setup():
     size(1280, 720, P3D)
     print("Using RANDOM_SEED {}, PERLIN_SEED {}".format(RANDOM_SEED, PERLIN_SEED))
+    frameRate(FPS)
     camera(CAMERA_X, CAMERA_Y, CAMERA_Z, 0, 0, 0, 0, 1, 0)
 
     # Create HORIZONTAL_PONTS x HORIZONTAL_POINTS matrix of numbers
@@ -211,3 +225,6 @@ def draw():
 
     # Draw water
     shape(water)
+
+    if SAVE_FRAMES:
+        saveFrame(SAVE_FRAMES_PATH)
