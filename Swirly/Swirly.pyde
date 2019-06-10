@@ -65,7 +65,27 @@ class SwirlyWalker(object):
         self._lifetime -= 1
 
 
-walkers = []
+class FlowerScene(object):
+    def __init__(self):
+        def createWalker(direction):
+            return SwirlyWalker(width/2, height/2, direction, 3.3, 0.08, -0.001, 40, 0.991, 275)
+
+        self._walkers = [createWalker(map(i, 0, 10, 0, TWO_PI))
+                         for i in range(10)]
+
+    def running(self):
+        return len(self._walkers) > 0
+
+    def update(self):
+        fill(20, 100, 80)
+        for w in self._walkers:
+            w.update()
+            w.paint()
+
+        self._walkers = [w for w in self._walkers if w.alive()]
+
+
+scenes = None
 
 
 def setup():
@@ -75,20 +95,16 @@ def setup():
     smooth(8)
     noStroke()
 
-    ellipse(0, 0, 100, 100)
+    global scenes
+    scenes = [FlowerScene()]
 
 
 def draw():
-    global walkers
+    if len(scenes) == 0:
+        return
 
-    for walker in walkers:
-        walker.update()
-        walker.paint()
-
-    walkers = [w for w in walkers if w.alive()]
-
-    if len(walkers) == 0:
-        fill(random(30), 100, 80, 20)
-        for i in range(10):
-            walkers.append(
-                SwirlyWalker(width/2, height/2, map(i, 0, 10, 0, TWO_PI), 3.3, 0.08, -0.001, 40, 0.991, 275))
+    scene = scenes[0]
+    if scene.running():
+        scene.update()
+    else:
+        scenes.pop(0)
