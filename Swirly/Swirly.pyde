@@ -67,17 +67,32 @@ class SwirlyWalker(object):
 
 class FlowerScene(object):
     def __init__(self):
+        self._hues = [53, 19, 0]
+        self._walkers = self._create_walkers()
+        self._hue_index = 0
+
+    def _create_walkers(self):
         def createWalker(direction):
             return SwirlyWalker(width/2, height/2, direction, 3.3, 0.08, -0.001, 40, 0.991, 275)
 
-        self._walkers = [createWalker(map(i, 0, 10, 0, TWO_PI))
-                         for i in range(10)]
+        return [createWalker(map(i, 0, 10, 0, TWO_PI))
+                for i in range(10)]
 
     def running(self):
-        return len(self._walkers) > 0
+        return self._hue_index < len(self._hues)
 
     def update(self):
-        fill(20, 100, 80)
+        if not self.running():
+            return
+
+        if len(self._walkers) == 0:
+            self._hue_index += 1
+            if not self.running():
+                return
+
+            self._walkers = self._create_walkers()
+
+        fill(self._hues[self._hue_index], 360, 288)
         for w in self._walkers:
             w.update()
             w.paint()
@@ -91,7 +106,7 @@ scenes = None
 def setup():
     size(1280, 720)
     background(0)
-    colorMode(HSB, 100)
+    colorMode(HSB, 360)
     smooth(8)
     noStroke()
 
@@ -107,4 +122,5 @@ def draw():
     if scene.running():
         scene.update()
     else:
+        background(0)
         scenes.pop(0)
