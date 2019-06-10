@@ -100,6 +100,60 @@ class FlowerScene(object):
         self._walkers = [w for w in self._walkers if w.alive()]
 
 
+class CircleScene(object):
+    def __init__(self):
+        self._circle_radius = 175
+        self._creation_period = 5  # create a new walker every 5 steps
+        self._until_creation = self._creation_period
+        self._max_walkers = 72
+        self._walkers_in_a_circle = 36
+        self._initial_walker_thickness = 20
+
+        self._progress_angle = 0
+        self._progress_angle_increase = -2 * TWO_PI / 350  # measured experimentally
+
+        self._walkers = [self._create_walker(0)]
+
+    def _create_walker(self, circle_angle):
+        pos_vector = PVector(self._circle_radius)
+        pos_vector.rotate(circle_angle)
+        pos_vector.add(PVector(width/2, height/2))
+
+        # Note that these values are experimentally determined
+        return SwirlyWalker(pos_vector.x, pos_vector.y, circle_angle - PI/2, 1.5, 0.000625, 0.0003125, self._initial_walker_thickness, 0.99, 195)
+
+    def running(self):
+        return any([w.alive() for w in self._walkers])
+
+    def update(self):
+        walker_count = len(self._walkers)
+
+        # Create a new walker if creation period passed
+        if self._until_creation == 0 and walker_count < self._max_walkers:
+            self._walkers.append(self._create_walker(
+                map(walker_count, 0, self._walkers_in_a_circle, TWO_PI, 0)))
+            self._until_creation = self._creation_period
+
+        for i in range(len(self._walkers)):
+            w = self._walkers[i]
+            if w.alive():
+                w.update()
+                fill(map(i, 0, self._max_walkers, 0, 360), 360, 288)
+                w.paint()
+
+        # If there are more walkers to be created, progress circle needs to advance too
+        if len(self._walkers) < self._max_walkers:
+            progress_circle = PVector(self._circle_radius)
+            progress_circle.rotate(self._progress_angle)
+            progress_circle.add(PVector(width/2, height/2))
+
+            self._progress_angle += self._progress_angle_increase
+            ellipse(progress_circle.x, progress_circle.y,
+                    self._initial_walker_thickness, self._initial_walker_thickness)
+
+        self._until_creation -= 1
+
+
 scenes = None
 
 
@@ -111,7 +165,7 @@ def setup():
     noStroke()
 
     global scenes
-    scenes = [FlowerScene()]
+    scenes = [CircleScene(), FlowerScene()]
 
 
 def draw():
