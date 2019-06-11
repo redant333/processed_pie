@@ -153,7 +153,51 @@ class CircleScene(object):
 
         self._until_creation -= 1
 
+class CloverScene(object):
+    def __init__(self):
+        self._leaf_walkers = []
+        self._spike_walkers = self._create_spikes()
+        self._until_leaf_creation = 50
 
+    def _create_spikes(self):
+        return [SwirlyWalker(width/2, height/2, PI/2 * i, 2, 0, 0, 30, 0.991, 150) for i in range(4)]
+
+    def _create_leaves(self):
+        def create_leaf(angle, facing):
+            return SwirlyWalker(width/2, height/2, angle, 3.3,
+                         0.04 * facing, -0.001 * facing, 40, 0.991, 150)
+
+        leaves = [create_leaf(i * PI/2, 1) for i in range(4)]
+        leaves += [create_leaf(i * PI/2, -1) for i in range(4)]
+        return leaves
+
+    def running(self):
+        return any([w.alive() for w in self._spike_walkers]) or any([w.alive() for w in self._leaf_walkers])
+
+    def update(self):
+        fill(55, 360, 250)
+        for w in self._spike_walkers:
+            if w.alive():
+                w.update()
+                w.paint()
+
+        fill(119, 360, 200)
+        for w in self._leaf_walkers:
+            if w.alive():
+                w.update()
+                w.paint()
+
+        if self._until_leaf_creation > 0:
+            self._until_leaf_creation -= 1
+
+            if self._until_leaf_creation == 0:
+                self._leaf_walkers = self._create_leaves()
+
+
+FRAMERATE = 60
+PAUSE_BETWEEN_SCENES = 2 * FRAMERATE
+
+until_scene_pause_end = PAUSE_BETWEEN_SCENES
 scenes = None
 
 
@@ -165,7 +209,11 @@ def setup():
     noStroke()
 
     global scenes
-    scenes = [CircleScene(), FlowerScene()]
+    scenes = [
+        FlowerScene(),
+        CloverScene(),
+        CircleScene(),
+        ]
 
 
 def draw():
@@ -173,8 +221,14 @@ def draw():
         return
 
     scene = scenes[0]
+
     if scene.running():
         scene.update()
     else:
-        background(0)
-        scenes.pop(0)
+        global until_scene_pause_end
+        if until_scene_pause_end == 0:
+            until_scene_pause_end = PAUSE_BETWEEN_SCENES
+            background(0)
+            scenes.pop(0)
+        else:
+            until_scene_pause_end -= 1
