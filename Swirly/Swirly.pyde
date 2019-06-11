@@ -193,6 +193,74 @@ class CloverScene(object):
             if self._until_leaf_creation == 0:
                 self._leaf_walkers = self._create_leaves()
 
+class RoseScene(object):
+    def __init__(self):
+        self._vertical_center = height * 0.6 #move the center of the flower a bit down
+        self._leaf_walkers = self._create_leaves()
+        self._petal_walkers = []
+        self._details_walkers = []
+        self._until_petal_creation = 134
+        self._until_details_creation = 234
+        self._details_created = False
+
+    def _create_leaves(self):
+        def create_leaf(angle, facing):
+            rotation_offset = -1
+            return SwirlyWalker(width/2, self._vertical_center, angle + rotation_offset * facing, 3.3, facing * 0.015, 0, 20, 0.998, 134)
+
+        leaves = [create_leaf(-PI/2 + map(i, 0,3, 0, TWO_PI), 1) for i in range(3)]
+        leaves += [create_leaf(-PI/2 + map(i, 0,3, 0, TWO_PI), -1) for i in range(3)]
+        return leaves
+
+    def _create_petals(self):
+        petals = [SwirlyWalker(
+            width/2, self._vertical_center, map(i, 0, 6, 0, TWO_PI), 3.3, -0.01, -0.001, 20, 1.02, 100) for i in range(6)]
+        petals += [SwirlyWalker(
+            width/2, self._vertical_center, map(i, 0, 6, 0, TWO_PI), 3.3, 0.01, 0.001, 20, 1.02, 100) for i in range(6)]
+        return petals
+
+    def _create_details(self):
+        rotation_offset = -0.2
+        details = [SwirlyWalker(
+            width/2, self._vertical_center, map(i, 0, 6, 0, TWO_PI) + rotation_offset, 3.3, -0.01, -0.001, 10, 0.998, 110) for i in range(6)]
+        return details
+
+    def running(self):
+        return not self._details_created or any([w.alive() for w in self._details_walkers])
+
+    def update(self):
+        fill(119, 360, 200)
+        for w in self._leaf_walkers:
+            if w.alive():
+                w.update()
+                w.paint()
+
+        fill(0, 360, 200)
+        for w in self._petal_walkers:
+            if w.alive():
+                w.update()
+                w.paint()
+
+        fill(0, 360, 0)
+        for w in self._details_walkers:
+            if w.alive():
+                w.update()
+                w.paint()
+
+        if self._until_petal_creation > 0:
+            self._until_petal_creation -= 1
+
+            if self._until_petal_creation == 0:
+                self._petal_walkers = self._create_petals()
+
+        if self._until_details_creation > 0:
+            self._until_details_creation -= 1
+
+            if self._until_details_creation == 0:
+                self._details_walkers = self._create_details()
+                self._details_created = True
+
+
 SAVE_FRAMES = False
 SAVE_FRAMES_PATH = "frames/frame_######.png"
 
@@ -215,6 +283,7 @@ def setup():
     scenes = [
         FlowerScene(),
         CloverScene(),
+        RoseScene(),
         CircleScene(),
         ]
 
