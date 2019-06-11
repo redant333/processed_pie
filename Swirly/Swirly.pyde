@@ -73,7 +73,7 @@ class FlowerScene(object):
 
     def _create_walkers(self):
         def createWalker(direction):
-            return SwirlyWalker(width/2, height/2, direction, 3.3, 0.08, -0.001, 40, 0.991, 275)
+            return SwirlyWalker(width/2, height/2, direction, 3.3, 0.08, -0.001, 40, 0.991, 225)
 
         return [createWalker(map(i, 0, 10, 0, TWO_PI))
                 for i in range(10)]
