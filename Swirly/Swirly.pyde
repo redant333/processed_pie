@@ -64,6 +64,10 @@ class SwirlyWalker(object):
         self._rotation_speed += self._rotation_acceleration
         self._lifetime -= 1
 
+###################
+# Scene definitions
+###################
+
 
 class FlowerScene(object):
     def __init__(self):
@@ -72,10 +76,10 @@ class FlowerScene(object):
         self._hue_index = 0
 
     def _create_walkers(self):
-        def createWalker(direction):
+        def create_walker(direction):
             return SwirlyWalker(width/2, height/2, direction, 3.3, 0.08, -0.001, 40, 0.991, 225)
 
-        return [createWalker(map(i, 0, 10, 0, TWO_PI))
+        return [create_walker(map(i, 0, 10, 0, TWO_PI))
                 for i in range(10)]
 
     def running(self):
@@ -153,6 +157,7 @@ class CircleScene(object):
 
         self._until_creation -= 1
 
+
 class CloverScene(object):
     def __init__(self):
         self._leaf_walkers = []
@@ -165,7 +170,7 @@ class CloverScene(object):
     def _create_leaves(self):
         def create_leaf(angle, facing):
             return SwirlyWalker(width/2, height/2, angle, 3.3,
-                         0.04 * facing, -0.001 * facing, 40, 0.991, 150)
+                                0.04 * facing, -0.001 * facing, 40, 0.991, 150)
 
         leaves = [create_leaf(i * PI/2, 1) for i in range(4)]
         leaves += [create_leaf(i * PI/2, -1) for i in range(4)]
@@ -193,9 +198,10 @@ class CloverScene(object):
             if self._until_leaf_creation == 0:
                 self._leaf_walkers = self._create_leaves()
 
+
 class RoseScene(object):
     def __init__(self):
-        self._vertical_center = height * 0.6 #move the center of the flower a bit down
+        self._vertical_center = height * 0.6  # move the center of the flower a bit down
         self._leaf_walkers = self._create_leaves()
         self._petal_walkers = []
         self._details_walkers = []
@@ -208,8 +214,10 @@ class RoseScene(object):
             rotation_offset = -1
             return SwirlyWalker(width/2, self._vertical_center, angle + rotation_offset * facing, 3.3, facing * 0.015, 0, 20, 0.998, 134)
 
-        leaves = [create_leaf(-PI/2 + map(i, 0,3, 0, TWO_PI), 1) for i in range(3)]
-        leaves += [create_leaf(-PI/2 + map(i, 0,3, 0, TWO_PI), -1) for i in range(3)]
+        leaves = [create_leaf(-PI/2 + map(i, 0, 3, 0, TWO_PI), 1)
+                  for i in range(3)]
+        leaves += [create_leaf(-PI/2 + map(i, 0, 3, 0, TWO_PI), -1)
+                   for i in range(3)]
         return leaves
 
     def _create_petals(self):
@@ -260,6 +268,10 @@ class RoseScene(object):
                 self._details_walkers = self._create_details()
                 self._details_created = True
 
+##############################
+# Processing loop and settings
+##############################
+
 
 SAVE_FRAMES = False
 SAVE_FRAMES_PATH = "frames/frame_######.png"
@@ -285,7 +297,7 @@ def setup():
         CloverScene(),
         RoseScene(),
         CircleScene(),
-        ]
+    ]
 
 
 def draw():
