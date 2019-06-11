@@ -193,6 +193,8 @@ class CloverScene(object):
             if self._until_leaf_creation == 0:
                 self._leaf_walkers = self._create_leaves()
 
+SAVE_FRAMES = False
+SAVE_FRAMES_PATH = "frames/frame_######.png"
 
 FRAMERATE = 60
 PAUSE_BETWEEN_SCENES = 2 * FRAMERATE
@@ -207,6 +209,7 @@ def setup():
     colorMode(HSB, 360)
     smooth(8)
     noStroke()
+    frameRate(FRAMERATE)
 
     global scenes
     scenes = [
@@ -232,3 +235,6 @@ def draw():
             scenes.pop(0)
         else:
             until_scene_pause_end -= 1
+
+    if SAVE_FRAMES:
+        saveFrame(SAVE_FRAMES_PATH)
