@@ -277,9 +277,13 @@ SAVE_FRAMES = False
 SAVE_FRAMES_PATH = "frames/frame_######.png"
 
 FRAMERATE = 60
-PAUSE_BETWEEN_SCENES = 2 * FRAMERATE
+PAUSE_AFTER_SCENE = 2 * FRAMERATE
+PAUSE_BEFORE_SCENE = 1 * FRAMERATE
 
-until_scene_pause_end = PAUSE_BETWEEN_SCENES
+(RENDERING, WAITING_FOR_END, WAITING_FOR_START, ENDED) = (
+    "rendering", "waiting_end", "waiting_start", "ended")
+current_state = None
+timer = None
 scenes = None
 
 
@@ -299,9 +303,33 @@ def setup():
         CircleScene(),
     ]
 
+    global current_state, timer
+    current_state = WAITING_FOR_START
+    timer = PAUSE_BEFORE_SCENE
+
 
 def draw():
+    global timer
+    if current_state == RENDERING:
+        handle_rendering()
+    elif current_state == WAITING_FOR_START:
+        handle_waiting_for_start()
+    elif current_state == WAITING_FOR_END:
+        handle_waiting_for_end()
+    elif current_state == ENDED:
+        return
+
+    if timer is not None:
+        timer -= 1
+
+    if SAVE_FRAMES:
+        saveFrame(SAVE_FRAMES_PATH)
+
+
+def handle_rendering():
+    global current_state, timer
     if len(scenes) == 0:
+        current_state = ENDED
         return
 
     scene = scenes[0]
@@ -309,13 +337,21 @@ def draw():
     if scene.running():
         scene.update()
     else:
-        global until_scene_pause_end
-        if until_scene_pause_end == 0:
-            until_scene_pause_end = PAUSE_BETWEEN_SCENES
-            background(0)
-            scenes.pop(0)
-        else:
-            until_scene_pause_end -= 1
+        timer = PAUSE_AFTER_SCENE
+        current_state = WAITING_FOR_END
 
-    if SAVE_FRAMES:
-        saveFrame(SAVE_FRAMES_PATH)
+
+def handle_waiting_for_start():
+    global current_state, timer
+    if timer == 0:
+        timer = None
+        current_state = RENDERING
+
+
+def handle_waiting_for_end():
+    global current_state, timer
+    if timer == 0:
+        scenes.pop(0)
+        background(0)
+        timer = PAUSE_BEFORE_SCENE
+        current_state = WAITING_FOR_START
