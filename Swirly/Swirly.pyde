@@ -67,7 +67,7 @@ class SwirlyWalker(object):
 
 class FlowerScene(object):
     def __init__(self):
-        self._hues = [53, 19, 0]
+        self._hues = [53, 19]
         self._walkers = self._create_walkers()
         self._hue_index = 0
 
