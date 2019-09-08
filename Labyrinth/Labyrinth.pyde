@@ -6,6 +6,9 @@ CAMERA_BACK_DISTANCE = 50
 CAMERA_FRONT_DISTANCE = 50
 CAMERA_Z = 89
 
+MOVEMENT_FRAMES = 15
+ROTATION_FRAMES = 30
+
 
 class Labyrinth(object):
     START = 0
@@ -157,7 +160,7 @@ class Player(object):
 
     def __init__(self, labyrinth):
         self._labyrinth = labyrinth
-        self._tweens = []
+        self._tween = None
 
         self._x = 0
         self._y = 1
@@ -168,7 +171,7 @@ class Player(object):
         self._geometry_direction = 0
 
     def move(self):
-        if self._tweens:
+        if self._tween:
             return
 
         def set_geometry_x(new_value):
@@ -202,8 +205,8 @@ class Player(object):
         self._x = new_x
         self._y = new_y
 
-        self._tweens.append(
-            Tween(geometry, geometry + offset, 15, set_geometry_function))
+        self._tween = Tween(geometry, geometry + offset,
+                            MOVEMENT_FRAMES, set_geometry_function)
 
     @property
     def geometry_direction(self):
@@ -218,7 +221,7 @@ class Player(object):
         return self._geometry_y
 
     def rotate_right(self):
-        if self._tweens:
+        if self._tween:
             return
 
         def set_direction(new_direction):
@@ -233,11 +236,11 @@ class Player(object):
 
         self._direction = next[self._direction]
 
-        self._tweens.append(Tween(self._geometry_direction,
-                                  self._geometry_direction + PI/2, 30, set_direction))
+        self._tween = Tween(self._geometry_direction,
+                            self._geometry_direction + PI/2, ROTATION_FRAMES, set_direction)
 
     def rotate_left(self):
-        if self._tweens:
+        if self._tween:
             return
 
         def set_direction(new_direction):
@@ -252,14 +255,17 @@ class Player(object):
 
         self._direction = next[self._direction]
 
-        self._tweens.append(Tween(self._geometry_direction,
-                                  self._geometry_direction - PI/2, 30, set_direction))
+        self._tween = Tween(self._geometry_direction,
+                            self._geometry_direction - PI/2, ROTATION_FRAMES, set_direction)
 
     def update(self):
-        for tween in self._tweens:
-            tween.update()
+        if not self._tween:
+            return
 
-        self._tweens = filter(lambda tween: not tween.finished, self._tweens)
+        self._tween.update()
+
+        if self._tween.finished:
+            self._tween = None
 
     def paint(self):
         pushMatrix()
