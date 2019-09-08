@@ -65,7 +65,10 @@ class Labyrinth(object):
         return cells
 
     def get(self, x, y):
-        return self._cells[y][x]
+        if 0 <= x < self._width and 0 <= y < self._height:
+            return self._cells[y][x]
+        else:
+            return None
 
     def to_shape(self):
         ret = createShape(GROUP)
@@ -143,16 +146,108 @@ class Tween(object):
 
 
 class Player(object):
-    def __init__(self, x, y, geometry_x, geometry_y):
-        self.x = x
-        self.y = y
-        self.geometry_x = geometry_x
-        self.geometry_y = geometry_y
+    X_PLUS = 0
+    Y_PLUS = 1
+    X_MINUS = 2
+    Y_MINUS = 3
+
+    def __init__(self, labyrinth):
+        self._labyrinth = labyrinth
+        self._tweens = []
+
+        self._x = 0
+        self._y = 1
+        self._direction = Player.X_PLUS
+
+        self._geometry_x = self._x * BLOCK_SIZE
+        self._geometry_y = self._y * BLOCK_SIZE
+        self._geometry_direction = 0
+
+    def move(self):
+        if self._tweens:
+            return
+
+        def set_geometry_x(new_value):
+            self._geometry_x = new_value
+
+        def set_geometry_y(new_value):
+            self._geometry_y = new_value
+
+        offsets = {
+            Player.X_PLUS: 1, Player.X_MINUS: -1, Player.Y_PLUS: 1, Player.Y_MINUS: -1
+        }
+
+        geometry = None
+        set_geometry_function = None
+        new_x = self._x
+        new_y = self._y
+        offset = offsets[self._direction] * BLOCK_SIZE
+
+        if self._direction == Player.X_PLUS or self._direction == Player.X_MINUS:
+            geometry = self._geometry_x
+            set_geometry_function = set_geometry_x
+            new_x = new_x + offsets[self._direction]
+        else:
+            geometry = self._geometry_y
+            set_geometry_function = set_geometry_y
+            new_y = new_y + offsets[self._direction]
+
+        if self._labyrinth.get(new_x, new_y) in [Labyrinth.WALL, None]:
+            return
+
+        self._x = new_x
+        self._y = new_y
+
+        self._tweens.append(
+            Tween(geometry, geometry + offset, 15, set_geometry_function))
+
+    @property
+    def geometry_direction(self):
+        return self._geometry_direction
+
+    @property
+    def geometry_x(self):
+        return self._geometry_x
+
+    @property
+    def geometry_y(self):
+        return self._geometry_y
+
+    def rotate_right(self):
+        if self._tweens:
+            return
+
+        def set_direction(new_direction):
+            self._geometry_direction = new_direction
+
+        new_direction = (self._direction + 1) % 4
+        self._tweens.append(Tween(self._geometry_direction,
+                                  new_direction * PI/2, 30, set_direction))
+        self._direction = new_direction
+
+    def rotate_left(self):
+        if self._tweens:
+            return
+
+        def set_direction(new_direction):
+            self._geometry_direction = new_direction
+
+        new_direction = (self._direction - 1) % 4
+
+        self._tweens.append(Tween(self._geometry_direction,
+                                  new_direction * PI/2, 30, set_direction))
+        self._direction = new_direction
+
+    def update(self):
+        for tween in self._tweens:
+            tween.update()
+
+        self._tweens = filter(lambda tween: not tween.finished, self._tweens)
 
     def paint(self):
         pushMatrix()
         fill(200, 200, 200)
-        translate(self.geometry_x, self.geometry_y, BLOCK_SIZE)
+        translate(self._geometry_x, self._geometry_y, BLOCK_SIZE)
         sphere(0.4 * BLOCK_SIZE)
         popMatrix()
 
@@ -160,9 +255,6 @@ class Player(object):
 labyrinth = None
 labyrinth_shape = None
 player = None
-rotation = 0
-
-tweens = []
 
 
 def setup():
@@ -177,41 +269,28 @@ def setup():
     labyrinth_shape = labyrinth.to_shape()
 
     global player
-    player = Player(0, 1, 0, BLOCK_SIZE)
+    player = Player(labyrinth)
 
 
 def draw():
-    camera(player.geometry_x - 50, player.geometry_y , 100, player.geometry_x + 50, player.geometry_y, 0, 0, 0, -1)
     background(0)
     lights()
 
-    global tweens
-    for tween in tweens:
-        tween.update()
-    tweens = filter(lambda tween: not tween.finished, tweens)
+    player.update()
 
-    rotateZ(rotation)
+    planar_camera_vector = PVector(-50, 0)
+    planar_camera_vector.rotate(player.geometry_direction)
+    camera(player.geometry_x + planar_camera_vector.x, player.geometry_y + planar_camera_vector.y, 100,
+           player.geometry_x, player.geometry_y, 0, 0, 0, -1)
 
     player.paint()
     shape(labyrinth_shape)
 
 
 def keyPressed():
-    def set_rotation(new_rotation):
-        global rotation
-        rotation = new_rotation
-
-    def set_player_position(new_position):
-        global player
-        player.geometry_x = new_position
-
-    global tweens
-    if tweens:
-        return
-
     if keyCode == UP:
-        tweens.append(Tween(player.geometry_x, player.geometry_x + BLOCK_SIZE, 25, set_player_position))
+        player.move()
     elif keyCode == LEFT:
-        tweens.append(Tween(rotation, rotation + PI/2, 50, set_rotation))
+        player.rotate_left()
     elif keyCode == RIGHT:
-        tweens.append(Tween(rotation, rotation - PI/2, 50, set_rotation))
+        player.rotate_right()
