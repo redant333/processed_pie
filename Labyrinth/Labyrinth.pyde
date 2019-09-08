@@ -2,6 +2,10 @@ from random import choice
 
 BLOCK_SIZE = 10
 
+CAMERA_BACK_DISTANCE = 50
+CAMERA_FRONT_DISTANCE = 50
+CAMERA_Z = 89
+
 
 class Labyrinth(object):
     START = 0
@@ -232,7 +236,6 @@ class Player(object):
         self._tweens.append(Tween(self._geometry_direction,
                                   self._geometry_direction + PI/2, 30, set_direction))
 
-
     def rotate_left(self):
         if self._tweens:
             return
@@ -271,6 +274,17 @@ labyrinth_shape = None
 player = None
 
 
+def set_camera():
+    camera_pos = PVector(-CAMERA_BACK_DISTANCE, 0)
+    camera_pos.rotate(player.geometry_direction)
+    camera_target = PVector(CAMERA_FRONT_DISTANCE, 0)
+    camera_target.rotate(player.geometry_direction)
+
+    camera(player.geometry_x + camera_pos.x, player.geometry_y + camera_pos.y, CAMERA_Z,
+           player.geometry_x + camera_target.x, player.geometry_y + camera_target.y, 0,
+           0, 0, -1)
+
+
 def setup():
     size(1280, 720, P3D)
     noStroke()
@@ -291,11 +305,7 @@ def draw():
     lights()
 
     player.update()
-
-    planar_camera_vector = PVector(-50, 0)
-    planar_camera_vector.rotate(player.geometry_direction)
-    camera(player.geometry_x + planar_camera_vector.x, player.geometry_y + planar_camera_vector.y, 100,
-           player.geometry_x, player.geometry_y, 0, 0, 0, -1)
+    set_camera()
 
     player.paint()
     shape(labyrinth_shape)
