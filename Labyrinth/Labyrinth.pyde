@@ -218,25 +218,39 @@ class Player(object):
             return
 
         def set_direction(new_direction):
-            self._geometry_direction = new_direction
+            self._geometry_direction = new_direction % TWO_PI
 
-        new_direction = (self._direction + 1) % 4
+        next = {
+            Player.X_PLUS: Player.Y_PLUS,
+            Player.Y_PLUS: Player.X_MINUS,
+            Player.X_MINUS: Player.Y_MINUS,
+            Player.Y_MINUS: Player.X_PLUS
+        }
+
+        self._direction = next[self._direction]
+
         self._tweens.append(Tween(self._geometry_direction,
-                                  new_direction * PI/2, 30, set_direction))
-        self._direction = new_direction
+                                  self._geometry_direction + PI/2, 30, set_direction))
+
 
     def rotate_left(self):
         if self._tweens:
             return
 
         def set_direction(new_direction):
-            self._geometry_direction = new_direction
+            self._geometry_direction = new_direction % TWO_PI
 
-        new_direction = (self._direction - 1) % 4
+        next = {
+            Player.X_PLUS: Player.Y_MINUS,
+            Player.Y_PLUS: Player.X_PLUS,
+            Player.X_MINUS: Player.Y_PLUS,
+            Player.Y_MINUS: Player.X_MINUS
+        }
+
+        self._direction = next[self._direction]
 
         self._tweens.append(Tween(self._geometry_direction,
-                                  new_direction * PI/2, 30, set_direction))
-        self._direction = new_direction
+                                  self._geometry_direction - PI/2, 30, set_direction))
 
     def update(self):
         for tween in self._tweens:
