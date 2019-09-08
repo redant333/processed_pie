@@ -304,6 +304,9 @@ def draw():
     background(0)
     lights()
 
+    if keyPressed:
+        handle_keys()
+
     player.update()
     set_camera()
 
@@ -311,7 +314,7 @@ def draw():
     shape(labyrinth_shape)
 
 
-def keyPressed():
+def handle_keys():
     if keyCode == UP:
         player.move()
     elif keyCode == LEFT:
