@@ -83,7 +83,7 @@ class Labyrinth(object):
                 elif val == Labyrinth.END:
                     block_color = color(0, 255, 0)
                 elif val == Labyrinth.WALL:
-                    block_color = color(100, 100, 100)
+                    block_color = color(5, 99, 8)
                     block_height = 2 * BLOCK_SIZE
                 elif val == Labyrinth.PATH:
                     block_color = color(200, 200, 0)
