@@ -2,7 +2,7 @@ from random import choice
 
 BLOCK_SIZE = 10
 
-CAMERA_BACK_DISTANCE = 50
+CAMERA_BACK_DISTANCE = 55
 CAMERA_FRONT_DISTANCE = 50
 CAMERA_Z = 89
 
@@ -269,15 +269,86 @@ class Player(object):
 
     def paint(self):
         pushMatrix()
+        noStroke()
         fill(200, 200, 200)
         translate(self._geometry_x, self._geometry_y, BLOCK_SIZE)
         sphere(0.4 * BLOCK_SIZE)
         popMatrix()
 
 
+class Label(object):
+    def __init__(self, x, y, z, final_z, string):
+        self._x = x
+        self._y = y
+        self._z = z
+
+        self._final_z = final_z
+        self._string = string
+
+        self._tweens = []
+        self._text_height = BLOCK_SIZE / 2
+        textSize(self._text_height)
+        self._text_width = textWidth(string)
+
+        self._rotation = 0
+
+        def set_rotation(new_rotation):
+            self._rotation = new_rotation
+
+        def set_z(new_z):
+            self._z = new_z
+
+        self._tweens.append(Tween(0,6 * TWO_PI,1300,set_rotation))
+        self._tweens.append(Tween(z, final_z, 50, set_z))
+
+    def update(self):
+        print(self._rotation)
+        for tween in self._tweens:
+            tween.update()
+        
+        self._tweens = filter(lambda tween: not tween.finished, self._tweens)
+
+    def paint(self):
+        offset = self._text_height / 4
+        a_little = 0.01
+
+        textAlign(CENTER, CENTER)
+        rectMode(CENTER)
+        textSize(self._text_height)
+
+        pushMatrix()
+        translate(self._x, self._y, self._z)
+        rotateZ(PI/2)
+        rotateX(-PI/2)
+        rotateY(self._rotation)
+
+        noStroke()
+        fill(0,160,0)
+
+        translate(0, 0, a_little)
+        text(self._string, 0, 0)
+
+        translate(0, 0, -a_little)
+        translate(0, textDescent() / 2, 0)
+        fill(255)
+        strokeWeight(10)
+        stroke(0,160,0)
+        rect(0,0,self._text_width + offset, self._text_height + textDescent() + offset)
+        translate(0, -textDescent() / 2, 0)
+
+        rotateY(PI)
+
+        fill(0,160,0)
+        translate(0, 0, a_little)
+        text(self._string, 0, 0)
+
+
+        popMatrix()
+
 labyrinth = None
 labyrinth_shape = None
 player = None
+label = None
 
 
 def set_camera():
@@ -295,6 +366,7 @@ def setup():
     size(1280, 720, P3D)
     noStroke()
     background(0)
+    textMode(SHAPE)
 
     global labyrinth
     labyrinth = Labyrinth(31, 31)
@@ -305,6 +377,9 @@ def setup():
     global player
     player = Player(labyrinth)
 
+    global label
+    label = Label(player.geometry_x, player.geometry_y, BLOCK_SIZE, 3 * BLOCK_SIZE, "Yay, you won!")
+
 
 def draw():
     background(0)
@@ -314,9 +389,12 @@ def draw():
         handle_keys()
 
     player.update()
+    label.update()
+
     set_camera()
 
     player.paint()
+    label.paint()
     shape(labyrinth_shape)
 
 
