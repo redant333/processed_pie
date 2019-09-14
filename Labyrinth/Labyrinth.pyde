@@ -4,6 +4,9 @@ FRAMERATE = 60
 
 BLOCK_SIZE = 10
 
+LABYRINTH_WIDTH = 31
+LABYRINTH_HEIGHT = 31
+
 CAMERA_BACK_DISTANCE = 55
 CAMERA_FRONT_DISTANCE = 50
 CAMERA_Z = 89
@@ -74,9 +77,9 @@ class Labyrinth(object):
                 cells[neighbor_y][neighbor_x] = Labyrinth.PATH
 
                 if x == neighbor_x:
-                    cells[x][(y+neighbor_y)/2] = Labyrinth.PATH
+                    cells[(y+neighbor_y)/2][x] = Labyrinth.PATH
                 elif y == neighbor_y:
-                    cells[(x+neighbor_x)/2][y] = Labyrinth.PATH
+                    cells[y][(x+neighbor_x)/2] = Labyrinth.PATH
 
                 stack.append((x, y))
                 (x, y) = (neighbor_x, neighbor_y)
@@ -416,7 +419,7 @@ def setup():
     textMode(SHAPE)
     background(0)
 
-    labyrinth = Labyrinth(31, 31)
+    labyrinth = Labyrinth(LABYRINTH_WIDTH, LABYRINTH_HEIGHT)
 
     global labyrinth_shape
     labyrinth_shape = labyrinth.to_shape()
