@@ -291,15 +291,20 @@ class Label(object):
         self._text_width = textWidth(string)
 
         self._rotation = 0
+        self._scale = 0
 
         def set_rotation(new_rotation):
             self._rotation = new_rotation
 
         def set_z(new_z):
             self._z = new_z
+        
+        def set_scale(new_scale):
+            self._scale = new_scale
 
         self._tweens.append(Tween(0,6 * TWO_PI,1300,set_rotation))
         self._tweens.append(Tween(z, final_z, 50, set_z))
+        self._tweens.append(Tween(0, 1, 50, set_scale))
 
     def update(self):
         print(self._rotation)
@@ -318,6 +323,7 @@ class Label(object):
 
         pushMatrix()
         translate(self._x, self._y, self._z)
+        scale(self._scale)
         rotateZ(PI/2)
         rotateX(-PI/2)
         rotateY(self._rotation)
