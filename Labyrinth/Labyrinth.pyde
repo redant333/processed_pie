@@ -106,8 +106,7 @@ class Labyrinth(object):
                 new_box = createShape(
                     BOX, BLOCK_SIZE, BLOCK_SIZE, block_height)
                 new_box.setFill(block_color)
-                new_box.setStroke(color(0, 255, 0))
-                new_box.setStrokeWeight(4)
+                new_box.setStroke(False)
                 new_box.translate(x * BLOCK_SIZE, y *
                                   BLOCK_SIZE, block_height/2)
                 ret.addChild(new_box)
@@ -233,6 +232,14 @@ class Player(object):
     @property
     def geometry_y(self):
         return self._geometry_y
+
+    @property
+    def won(self):
+        return self._labyrinth.get(self._x, self._y) == Labyrinth.END
+    
+    @property
+    def animating(self):
+        return self._tween is not None
 
     def rotate_right(self):
         if self._tween:
@@ -368,7 +375,7 @@ class Label(object):
 
         popMatrix()
 
-labyrinth = None
+
 labyrinth_shape = None
 player = None
 label = None
@@ -384,14 +391,20 @@ def set_camera():
            player.geometry_x + camera_target.x, player.geometry_y + camera_target.y, 0,
            0, 0, -1)
 
+def handle_keys():
+    if keyCode == UP:
+        player.move()
+    elif keyCode == LEFT:
+        player.rotate_left()
+    elif keyCode == RIGHT:
+        player.rotate_right()
 
 def setup():
     size(1280, 720, P3D)
-    noStroke()
-    background(0)
+    frameRate(FRAMERATE)
     textMode(SHAPE)
+    background(0)
 
-    global labyrinth
     labyrinth = Labyrinth(31, 31)
 
     global labyrinth_shape
@@ -400,32 +413,24 @@ def setup():
     global player
     player = Player(labyrinth)
 
-    global label
-    label = Label(player.geometry_x, player.geometry_y, PLAYER_Z, PLAYER_Z + 2 * BLOCK_SIZE, "Yay, you won!")
-
 
 def draw():
+    global label
     background(0)
     lights()
-    frameRate(FRAMERATE)
 
-    if keyPressed:
+    if not player.won and keyPressed:
         handle_keys()
 
+    if player.won and not player.animating and not label:
+        label = Label(player.geometry_x, player.geometry_y, PLAYER_Z, PLAYER_Z + 2 * BLOCK_SIZE, "Yay, you won!")
+
     player.update()
-    label.update()
-
     set_camera()
-
     player.paint()
-    label.paint()
+
+    if label:
+        label.update()
+        label.paint()
+
     shape(labyrinth_shape)
-
-
-def handle_keys():
-    if keyCode == UP:
-        player.move()
-    elif keyCode == LEFT:
-        player.rotate_left()
-    elif keyCode == RIGHT:
-        player.rotate_right()
