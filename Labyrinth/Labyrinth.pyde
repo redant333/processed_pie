@@ -1,13 +1,21 @@
 from random import choice
 
+FRAMERATE = 60
+
 BLOCK_SIZE = 10
 
 CAMERA_BACK_DISTANCE = 55
 CAMERA_FRONT_DISTANCE = 50
 CAMERA_Z = 89
 
-MOVEMENT_FRAMES = 15
-ROTATION_FRAMES = 30
+PLAYER_MOVEMENT_FRAMES = FRAMERATE / 4
+PLAYER_ROTATION_FRAMES = FRAMERATE / 2
+PLAYER_Z = BLOCK_SIZE
+PLAYER_SIZE = 0.4 * BLOCK_SIZE
+
+LABEL_ROTATION_FRAMES = 3.5 * FRAMERATE
+LABEL_RISE_FRAMES = 0.8 * FRAMERATE
+LABEL_SCALE_FRAMES = LABEL_RISE_FRAMES
 
 
 class Labyrinth(object):
@@ -126,22 +134,28 @@ class Labyrinth(object):
 
 
 class Tween(object):
-    def __init__(self, from_val, to_val, frames, update_function=None):
+    def __init__(self, from_val, to_val, frames, update_function=None, finish_function=None):
         self._from_val = from_val
         self._to_val = to_val
         self._frames = frames
         self._frames_elapsed = 0
         self._update_function = update_function
+        self._finish_function = finish_function
         self._finished = False
 
     def update(self):
+        if self._finished:
+            return
+
         self._frames_elapsed += 1
 
         if self._update_function:
             self._update_function(self.value)
 
-        if self._frames == self._frames_elapsed:
+        if self._frames <= self._frames_elapsed:
             self._finished = True
+            if self._finish_function:
+                self._finish_function()
 
     @property
     def value(self):
@@ -206,7 +220,7 @@ class Player(object):
         self._y = new_y
 
         self._tween = Tween(geometry, geometry + offset,
-                            MOVEMENT_FRAMES, set_geometry_function)
+                            PLAYER_MOVEMENT_FRAMES, set_geometry_function)
 
     @property
     def geometry_direction(self):
@@ -237,7 +251,7 @@ class Player(object):
         self._direction = next[self._direction]
 
         self._tween = Tween(self._geometry_direction,
-                            self._geometry_direction + PI/2, ROTATION_FRAMES, set_direction)
+                            self._geometry_direction + PI/2, PLAYER_ROTATION_FRAMES, set_direction)
 
     def rotate_left(self):
         if self._tween:
@@ -256,7 +270,7 @@ class Player(object):
         self._direction = next[self._direction]
 
         self._tween = Tween(self._geometry_direction,
-                            self._geometry_direction - PI/2, ROTATION_FRAMES, set_direction)
+                            self._geometry_direction - PI/2, PLAYER_ROTATION_FRAMES, set_direction)
 
     def update(self):
         if not self._tween:
@@ -271,8 +285,8 @@ class Player(object):
         pushMatrix()
         noStroke()
         fill(200, 200, 200)
-        translate(self._geometry_x, self._geometry_y, BLOCK_SIZE)
-        sphere(0.4 * BLOCK_SIZE)
+        translate(self._geometry_x, self._geometry_y, PLAYER_Z)
+        sphere(PLAYER_SIZE)
         popMatrix()
 
 
@@ -294,7 +308,7 @@ class Label(object):
         self._scale = 0
 
         def set_rotation(new_rotation):
-            self._rotation = new_rotation
+            self._rotation = new_rotation % TWO_PI
 
         def set_z(new_z):
             self._z = new_z
@@ -302,12 +316,15 @@ class Label(object):
         def set_scale(new_scale):
             self._scale = new_scale
 
-        self._tweens.append(Tween(0,6 * TWO_PI,1300,set_rotation))
-        self._tweens.append(Tween(z, final_z, 50, set_z))
-        self._tweens.append(Tween(0, 1, 50, set_scale))
+        def rotate_again():
+            self._tweens.append(
+                Tween(self._rotation, self._rotation + TWO_PI, LABEL_ROTATION_FRAMES, set_rotation, rotate_again))
+
+        self._tweens.append(Tween(0, TWO_PI, LABEL_ROTATION_FRAMES, set_rotation, rotate_again))
+        self._tweens.append(Tween(z, final_z, LABEL_RISE_FRAMES, set_z))
+        self._tweens.append(Tween(0, 1, LABEL_SCALE_FRAMES, set_scale))
 
     def update(self):
-        print(self._rotation)
         for tween in self._tweens:
             tween.update()
         
@@ -384,12 +401,13 @@ def setup():
     player = Player(labyrinth)
 
     global label
-    label = Label(player.geometry_x, player.geometry_y, BLOCK_SIZE, 3 * BLOCK_SIZE, "Yay, you won!")
+    label = Label(player.geometry_x, player.geometry_y, PLAYER_Z, PLAYER_Z + 2 * BLOCK_SIZE, "Yay, you won!")
 
 
 def draw():
     background(0)
     lights()
+    frameRate(FRAMERATE)
 
     if keyPressed:
         handle_keys()
