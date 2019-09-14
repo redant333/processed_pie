@@ -17,6 +17,14 @@ LABEL_ROTATION_FRAMES = 3.5 * FRAMERATE
 LABEL_RISE_FRAMES = 0.8 * FRAMERATE
 LABEL_SCALE_FRAMES = LABEL_RISE_FRAMES
 
+START_COLOR = color(255, 0, 0)
+END_COLOR = color(0, 255, 0)
+PATH_COLOR = color(200, 200, 0)
+WALL_COLOR = color(5, 99, 8)
+PLAYER_COLOR = color(200, 200, 200)
+LABEL_FOREGROUND = color(0, 160, 0)
+LABEL_BACKGROUND = color(255)
+
 
 class Labyrinth(object):
     START = 0
@@ -94,14 +102,14 @@ class Labyrinth(object):
                 block_height = BLOCK_SIZE
 
                 if val == Labyrinth.START:
-                    block_color = color(255, 0, 0)
+                    block_color = START_COLOR
                 elif val == Labyrinth.END:
-                    block_color = color(0, 255, 0)
+                    block_color = END_COLOR
                 elif val == Labyrinth.WALL:
-                    block_color = color(5, 99, 8)
+                    block_color = WALL_COLOR
                     block_height = 2 * BLOCK_SIZE
                 elif val == Labyrinth.PATH:
-                    block_color = color(200, 200, 0)
+                    block_color = PATH_COLOR
 
                 new_box = createShape(
                     BOX, BLOCK_SIZE, BLOCK_SIZE, block_height)
@@ -291,7 +299,7 @@ class Player(object):
     def paint(self):
         pushMatrix()
         noStroke()
-        fill(200, 200, 200)
+        fill(PLAYER_COLOR)
         translate(self._geometry_x, self._geometry_y, PLAYER_Z)
         sphere(PLAYER_SIZE)
         popMatrix()
