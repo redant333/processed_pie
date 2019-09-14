@@ -236,7 +236,7 @@ class Player(object):
     @property
     def won(self):
         return self._labyrinth.get(self._x, self._y) == Labyrinth.END
-    
+
     @property
     def animating(self):
         return self._tween is not None
@@ -319,7 +319,7 @@ class Label(object):
 
         def set_z(new_z):
             self._z = new_z
-        
+
         def set_scale(new_scale):
             self._scale = new_scale
 
@@ -327,14 +327,15 @@ class Label(object):
             self._tweens.append(
                 Tween(self._rotation, self._rotation + TWO_PI, LABEL_ROTATION_FRAMES, set_rotation, rotate_again))
 
-        self._tweens.append(Tween(0, TWO_PI, LABEL_ROTATION_FRAMES, set_rotation, rotate_again))
+        self._tweens.append(
+            Tween(0, TWO_PI, LABEL_ROTATION_FRAMES, set_rotation, rotate_again))
         self._tweens.append(Tween(z, final_z, LABEL_RISE_FRAMES, set_z))
         self._tweens.append(Tween(0, 1, LABEL_SCALE_FRAMES, set_scale))
 
     def update(self):
         for tween in self._tweens:
             tween.update()
-        
+
         self._tweens = filter(lambda tween: not tween.finished, self._tweens)
 
     def paint(self):
@@ -353,7 +354,7 @@ class Label(object):
         rotateY(self._rotation)
 
         noStroke()
-        fill(0,160,0)
+        fill(0, 160, 0)
 
         translate(0, 0, a_little)
         text(self._string, 0, 0)
@@ -362,16 +363,16 @@ class Label(object):
         translate(0, textDescent() / 2, 0)
         fill(255)
         strokeWeight(10)
-        stroke(0,160,0)
-        rect(0,0,self._text_width + offset, self._text_height + textDescent() + offset)
+        stroke(0, 160, 0)
+        rect(0, 0, self._text_width + offset,
+             self._text_height + textDescent() + offset)
         translate(0, -textDescent() / 2, 0)
 
         rotateY(PI)
 
-        fill(0,160,0)
+        fill(0, 160, 0)
         translate(0, 0, a_little)
         text(self._string, 0, 0)
-
 
         popMatrix()
 
@@ -391,6 +392,7 @@ def set_camera():
            player.geometry_x + camera_target.x, player.geometry_y + camera_target.y, 0,
            0, 0, -1)
 
+
 def handle_keys():
     if keyCode == UP:
         player.move()
@@ -398,6 +400,7 @@ def handle_keys():
         player.rotate_left()
     elif keyCode == RIGHT:
         player.rotate_right()
+
 
 def setup():
     size(1280, 720, P3D)
@@ -423,7 +426,8 @@ def draw():
         handle_keys()
 
     if player.won and not player.animating and not label:
-        label = Label(player.geometry_x, player.geometry_y, PLAYER_Z, PLAYER_Z + 2 * BLOCK_SIZE, "Yay, you won!")
+        label = Label(player.geometry_x, player.geometry_y,
+                      PLAYER_Z, PLAYER_Z + 2 * BLOCK_SIZE, "Yay, you won!")
 
     player.update()
     set_camera()
