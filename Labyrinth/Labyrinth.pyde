@@ -1,5 +1,8 @@
 from random import choice
 
+########################
+# Constants
+########################
 FRAMERATE = 60
 
 BLOCK_SIZE = 10
@@ -29,13 +32,29 @@ LABEL_FOREGROUND = color(0, 160, 0)
 LABEL_BACKGROUND = color(255)
 
 
+############################
+# Class definitions
+############################
+
 class Labyrinth(object):
+    """Class that represents a labyrinth made of cells in 2D grid.
+       Each cell represents start, end, wall or path.
+    """
     START = 0
     WALL = 1
     PATH = 2
     END = 4
 
     def __init__(self, w, h):
+        """Creates a Labyrinth
+        
+        Arguments:
+            w {[int]} -- Width of the labyrinth
+            h {[int]} -- Height of the labyirinth
+        
+        Raises:
+            ValueError: If w and h are not odd numbers(labyrinth cannot be created that way)
+        """
         if w % 2 == 0 or h % 2 == 0:
             raise ValueError("Width and height must be odd numbers")
 
@@ -45,13 +64,34 @@ class Labyrinth(object):
 
     @property
     def w(self):
+        """Get the width of the Labyrinth
+        
+        Returns:
+            [int] -- Width of the Labyirinth
+        """
         return self._width
 
     @property
     def h(self):
+        """Get the height of the Labyrinth
+        
+        Returns:
+            [int] -- Height of the Labyirinth
+        """
         return self._height
 
     def _generate_labyrinth(self, w, h):
+        """Populates the labyrinth with walls, paths, start and end.
+           Uses the recursive algorithm.
+        
+        Arguments:
+            w {[int]} -- Width of the labyrinth
+            h {[int]} -- Height of the labyrinth
+        
+        Returns:
+            [int[][]] -- Integer matrix with dimensions w x h that contains
+                         the values for walls, paths, start and end.
+        """
         cells = [[Labyrinth.WALL] * w for _ in range(h)]
 
         cells[1][0] = Labyrinth.START
@@ -91,12 +131,27 @@ class Labyrinth(object):
         return cells
 
     def get(self, x, y):
+        """Get the cell value at position (x,y)
+        
+        Arguments:
+            x {[int]} -- x coordinate of the cell
+            y {[int]} -- y coordinate of the cell
+        
+        Returns:
+            [int] -- One of the values START, END, WALL, PATH if (x,y) is
+                     inside of the labyrinth, None otherwise
+        """
         if 0 <= x < self._width and 0 <= y < self._height:
             return self._cells[y][x]
         else:
             return None
 
     def to_shape(self):
+        """Create 3D PShape that represents the Labyrinth
+        
+        Returns:
+            [PShape] -- 3D representation of the Labyrinth
+        """
         ret = createShape(GROUP)
         for x in range(self._width):
             for y in range(self._height):
@@ -123,28 +178,25 @@ class Labyrinth(object):
                 ret.addChild(new_box)
         return ret
 
-    def paint(self):
-        noStroke()
-        segment_size = 10
-        for y in range(self._height):
-            for x in range(self._width):
-                fill_color = None
-                if self._cells[y][x] == Labyrinth.START:
-                    fill_color = color(255, 0, 0)
-                elif self._cells[y][x] == Labyrinth.END:
-                    fill_color = color(0, 255, 0)
-                elif self._cells[y][x] == Labyrinth.WALL:
-                    fill_color = color(100, 100, 100)
-                elif self._cells[y][x] == Labyrinth.PATH:
-                    fill_color = color(200, 200, 0)
-
-                fill(fill_color)
-                rect(x * segment_size, y * segment_size,
-                     segment_size, segment_size)
-
 
 class Tween(object):
+    """Class that does linear interpolation between two values over the specified
+       number of steps.
+    """
+
     def __init__(self, from_val, to_val, frames, update_function=None, finish_function=None):
+        """Creates a Tween object
+        
+        Arguments:
+            from_val {[number]} -- starting value of the tween
+            to_val {[number]} -- ending value of the tween
+            frames {[int]} -- number of steps to get from the starting to the ending value
+        
+        Keyword Arguments:
+            update_function {[function]} -- function to be called on every tween update (default: {None})
+            finish_function {[function]} -- function to be called when tween reaches the
+                                            ending value (default: {None})
+        """
         self._from_val = from_val
         self._to_val = to_val
         self._frames = frames
@@ -154,6 +206,10 @@ class Tween(object):
         self._finished = False
 
     def update(self):
+        """Advances the tween to the next value. It takes frames calls to this
+           function for the tween to reach to_val. After that, this method has
+           no effect. Calls update_function if the value has changed.
+        """
         if self._finished:
             return
 
@@ -169,20 +225,38 @@ class Tween(object):
 
     @property
     def value(self):
+        """Get the value of this tween.
+        
+        Returns:
+            [number] -- Current value of this tween.
+        """
         return map(self._frames_elapsed, 0, self._frames, self._from_val, self._to_val)
 
     @property
     def finished(self):
+        """Checks whether the tween has reached to_val. If this method returns true
+           value will return to_val.
+        
+        Returns:
+            [boolean] -- True if finished, False otherwise
+        """
         return self._finished
 
 
 class Player(object):
+    """Class that represents the player.
+    """
     X_PLUS = 0
     Y_PLUS = 1
     X_MINUS = 2
     Y_MINUS = 3
 
     def __init__(self, labyrinth):
+        """Creates a Player object which can move through the specified labyirinth
+        
+        Arguments:
+            labyrinth {[Labyrinth]} -- A labyrinth through which this Player can move
+        """
         self._labyrinth = labyrinth
         self._tween = None
 
@@ -195,6 +269,8 @@ class Player(object):
         self._geometry_direction = 0
 
     def move(self):
+        """Start the movement of the Player one step in the direction it is facing if the cell is not a wall.
+        """
         if self._tween:
             return
 
@@ -234,6 +310,12 @@ class Player(object):
 
     @property
     def geometry_direction(self):
+        """Gets the direction Player is currently facing. This direction does not need
+           to be a multiple of 90 degrees due to animation.
+        
+        Returns:
+            [float] -- The direction Player is currently facing
+        """
         return self._geometry_direction
 
     @property
@@ -242,17 +324,35 @@ class Player(object):
 
     @property
     def geometry_y(self):
+        """Current y coordinate of the Player in the world coordinates (not the labyrinth
+           cell coordinates)
+        
+        Returns:
+            [float] -- The current y coordinate of the Player
+        """
         return self._geometry_y
 
     @property
     def won(self):
+        """Checks whether the Player is at the end of the labyrinth
+        
+        Returns:
+            [bool] -- True if the Player is currently at the end of the labyrint, False otherwise
+        """
         return self._labyrinth.get(self._x, self._y) == Labyrinth.END
 
     @property
     def animating(self):
+        """Checks whether the Player is currently animating (rotating or moving)
+        
+        Returns:
+            [bool] -- [description]
+        """
         return self._tween is not None
 
     def rotate_right(self):
+        """Starts the rotation of the Player by 90 degrees in clockwise direction
+        """
         if self._tween:
             return
 
@@ -272,6 +372,8 @@ class Player(object):
                             self._geometry_direction + PI/2, PLAYER_ROTATION_FRAMES, set_direction)
 
     def rotate_left(self):
+        """Starts the rotation of the Player by 90 degrees in anticlockwise direction
+        """
         if self._tween:
             return
 
@@ -291,6 +393,8 @@ class Player(object):
                             self._geometry_direction - PI/2, PLAYER_ROTATION_FRAMES, set_direction)
 
     def update(self):
+        """Update the internal state of the Player. This method should be called once for every frame
+        """
         if not self._tween:
             return
 
@@ -300,6 +404,8 @@ class Player(object):
             self._tween = None
 
     def paint(self):
+        """Draw the 3D representation of the Player in the world.
+        """
         pushMatrix()
         noStroke()
         fill(PLAYER_COLOR)
@@ -309,7 +415,19 @@ class Player(object):
 
 
 class Label(object):
+    """3D animated label that rises and rotates.
+    """
     def __init__(self, x, y, z, final_z, string):
+        """Creates a Label with text string that starts at (x,y,z) and moves
+           towards (x,y,final_z) while rotating.
+        
+        Arguments:
+            x {float} -- Initial x coordinate
+            y {float} -- Initial y coordinate
+            z {float} -- Initial z coordinate
+            final_z {float} -- Final z coordinate
+            string {[type]} -- Text written on the Label
+        """
         self._x = x
         self._y = y
         self._z = z
@@ -344,12 +462,17 @@ class Label(object):
         self._tweens.append(Tween(0, 1, LABEL_SCALE_FRAMES, set_scale))
 
     def update(self):
+        """Update the internal state of the Label. This method should be called once for every frame
+        """
         for tween in self._tweens:
             tween.update()
 
         self._tweens = filter(lambda tween: not tween.finished, self._tweens)
 
     def paint(self):
+        """Draw the 3D representation of the Label in the world.
+           Contains drawing commands of questionable readability.
+        """
         offset = self._text_height / 4
         a_little = 0.01
 
@@ -387,6 +510,9 @@ class Label(object):
 
         popMatrix()
 
+##########################
+# Main loop and globals
+##########################
 
 labyrinth_shape = None
 player = None
@@ -394,6 +520,8 @@ label = None
 
 
 def set_camera():
+    """Sets the camera position and direction
+    """
     camera_pos = PVector(-CAMERA_BACK_DISTANCE, 0)
     camera_pos.rotate(player.geometry_direction)
     camera_target = PVector(CAMERA_FRONT_DISTANCE, 0)
@@ -405,6 +533,8 @@ def set_camera():
 
 
 def handle_keys():
+    """Check for the pressed keys and trigger player movement accordingly
+    """
     if keyCode == UP:
         player.move()
     elif keyCode == LEFT:
