@@ -10,6 +10,9 @@ pub struct Maze {
 
 impl Maze {
     pub fn new(width: usize, height: usize, walls_on: bool) -> Maze {
+        assert!(width > 1);
+        assert!(height > 1);
+
         let vertical_walls = vec![vec![walls_on; height]; width + 1];
         let horizontal_walls = vec![vec![walls_on; height + 1]; width];
 
@@ -19,6 +22,25 @@ impl Maze {
             vertical_walls,
             horizontal_walls,
         }
+    }
+
+    pub fn new_with_edges(width: usize, height: usize, walls_on: bool) -> Maze {
+        let mut maze = Maze::new(width, height, walls_on);
+
+        for i in maze.vertical_walls.first_mut().unwrap() {
+            *i = true;
+        }
+
+        for i in maze.vertical_walls.last_mut().unwrap() {
+            *i = true;
+        }
+
+        for row in &mut maze.horizontal_walls {
+            *row.first_mut().unwrap() = true;
+            *row.last_mut().unwrap() = true;
+        }
+
+        maze
     }
 
     pub fn width(&self) -> usize { self.width }

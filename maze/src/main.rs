@@ -2,6 +2,7 @@ use maze::draw::Draw;
 use nannou::prelude::*;
 
 use maze::maze::{Maze};
+use maze::generate::simple::SimpleGenerator;
 
 struct Model {
     back_color: Rgb8,
@@ -22,10 +23,17 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
 
+    let mut maze = Maze::new_with_edges(38, 20, false);
+    let generator = SimpleGenerator::new(38, 20);
+
+    for (wall, state) in generator {
+        maze.set_wall(&wall, state);
+    }
+
     Model {
         back_color: rgb8(0x07, 0x10, 0x13),
         wall_color: rgb8(0x01, 0x97, 0xf6),
-        maze: Maze::new(38, 20, true),
+        maze,
     }
 }
 

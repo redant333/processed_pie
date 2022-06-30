@@ -26,6 +26,10 @@ impl<'a> Draw<'a> {
     }
 
     pub fn wall(&self, wall: &Wall) {
+        if !self.maze.get_wall(wall) {
+            return;
+        }
+
         let maze_width = self.maze.width() as f32 * self.wall_length;
         let maze_height = self.maze.height() as f32 * self.wall_length;
 

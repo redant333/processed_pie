@@ -68,9 +68,9 @@ mod tests {
 
     #[test]
     fn maze_set_wall_can_set_all_walls() {
-        let mut maze = Maze::new(2, 2, false);
+        let mut maze = Maze::new(3, 2, false);
 
-        for (x, y) in itertools::iproduct!(0..2, 0..2) {
+        for (x, y) in itertools::iproduct!(0..3, 0..2) {
             maze.set_wall(&Wall {x, y, dir: Up}, true);
             maze.set_wall(&Wall {x, y, dir: Down}, true);
             maze.set_wall(&Wall {x, y, dir: Left}, true);
@@ -82,6 +82,17 @@ mod tests {
             .filter(|wall| maze.get_wall(wall))
             .count();
 
-        assert_eq!(on_count, 12);
+        assert_eq!(on_count, 17);
+    }
+
+    #[test]
+    fn maze_can_be_constructed_with_edges() {
+        let maze = Maze::new_with_edges(10, 10, false);
+
+        let on_count = maze.wall_iter()
+            .filter(|wall| maze.get_wall(wall))
+            .count();
+
+        assert_eq!(on_count, 40);
     }
 }
