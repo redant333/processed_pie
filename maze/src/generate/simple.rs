@@ -1,6 +1,8 @@
 use crate::maze::Wall;
 use crate::maze::wall::Direction::*;
 
+use super::MazeGenerator;
+
 pub struct SimpleGenerator {
     width: usize,
     height: usize,
@@ -36,6 +38,16 @@ impl Iterator for SimpleGenerator {
         }
 
         Some((new_wall, true))
+    }
+}
+
+impl MazeGenerator for SimpleGenerator {
+    fn width(&self) -> usize {
+        self.width
+    }
+
+    fn height(&self) -> usize {
+        self.height
     }
 }
 

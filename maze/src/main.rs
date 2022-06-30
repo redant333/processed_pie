@@ -1,13 +1,10 @@
-use maze::draw::Draw;
+use maze::animate::{AnimatorConfig, Animator};
 use nannou::prelude::*;
 
-use maze::maze::{Maze};
 use maze::generate::simple::SimpleGenerator;
 
 struct Model {
-    back_color: Rgb8,
-    wall_color: Rgb8,
-    maze: Maze,
+    animator: Animator<SimpleGenerator>,
 }
 
 fn main() {
@@ -23,31 +20,27 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
 
-    let mut maze = Maze::new_with_edges(38, 20, false);
-    let generator = SimpleGenerator::new(38, 20);
-
-    for (wall, state) in generator {
-        maze.set_wall(&wall, state);
-    }
-
-    Model {
+    let config = AnimatorConfig {
         back_color: rgb8(0x07, 0x10, 0x13),
         wall_color: rgb8(0x01, 0x97, 0xf6),
-        maze,
+        wall_size: 32.0,
+    };
+    let generator = SimpleGenerator::new(38, 20);
+    let animator = Animator::new(config, generator);
+
+    Model {
+        animator,
     }
 }
 
-fn update(_app: &App, _model: &mut Model, _update: Update) {}
+fn update(_app: &App, model: &mut Model, _update: Update) {
+    model.animator.update();
+}
 
 fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
-    draw.background().color(model.back_color);
 
-    let maze_draw = Draw::new(&draw, &model.maze, model.wall_color, 32.0);
-
-    for wall in model.maze.wall_iter() {
-        maze_draw.wall(&wall);
-    }
+    model.animator.draw(&draw);
 
     draw.to_frame(app, &frame).unwrap();
 }
