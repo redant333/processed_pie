@@ -1,4 +1,5 @@
 use super::{WallIterator, Wall};
+use super::{wall::Direction::*};
 
 pub struct Maze {
     width: usize,
@@ -30,19 +31,19 @@ impl Maze {
 
     pub fn set_wall(&mut self, wall: &Wall, on: bool) {
         match wall {
-            &Wall::Up { x, y }    => self.horizontal_walls[x][y] = on,
-            &Wall::Down { x, y }  => self.horizontal_walls[x][y+1] = on,
-            &Wall::Left { x, y }  => self.vertical_walls[x+1][y] = on,
-            &Wall::Right { x, y } => self.vertical_walls[x][y] = on,
+            &Wall { x, y, dir: Up } => self.horizontal_walls[x][y] = on,
+            &Wall { x, y, dir: Down } => self.horizontal_walls[x][y+1] = on,
+            &Wall { x, y, dir: Left } => self.vertical_walls[x][y] = on,
+            &Wall { x, y, dir: Right } => self.vertical_walls[x+1][y] = on,
         }
     }
 
     pub fn get_wall(&self, wall: &Wall) -> bool {
         match wall {
-            &Wall::Up { x, y }    => self.horizontal_walls[x][y],
-            &Wall::Down { x, y }  => self.horizontal_walls[x][y+1],
-            &Wall::Left { x, y }  => self.vertical_walls[x+1][y],
-            &Wall::Right { x, y } => self.vertical_walls[x][y],
+            &Wall { x, y, dir: Up } => self.horizontal_walls[x][y],
+            &Wall { x, y, dir: Down } => self.horizontal_walls[x][y+1],
+            &Wall { x, y, dir: Left } => self.vertical_walls[x][y],
+            &Wall { x, y, dir: Right } => self.vertical_walls[x+1][y],
         }
     }
 }

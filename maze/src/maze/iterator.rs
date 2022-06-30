@@ -1,4 +1,5 @@
 use super::{Wall, Maze};
+use super::wall::Direction::*;
 
 pub struct WallIterator<'a> {
     iter: Box<dyn Iterator<Item=Wall> + 'a>
@@ -6,12 +7,12 @@ pub struct WallIterator<'a> {
 
 impl<'a> WallIterator<'a> {
     pub fn new(maze: &'a Maze) -> WallIterator {
-        let left_edge_iter = (0..maze.height()).map(|y| Wall::Left { x: 0, y: y });
-        let top_edge_iter = (0..maze.width()).map(|x| Wall::Up { x, y: 0 });
+        let left_edge_iter = (0..maze.height()).map(|y| Wall { x: 0, y, dir: Left });
+        let top_edge_iter = (0..maze.width()).map(|x| Wall { x, y: 0, dir: Up });
         let right_iter = itertools::iproduct!(0..maze.width(), 0..maze.height())
-            .map(|(x, y)| Wall::Right { x, y });
+            .map(|(x, y)| Wall { x, y, dir: Right });
         let down_iter = itertools::iproduct!(0..maze.width(), 0..maze.height())
-            .map(|(x, y)| Wall::Down { x, y });
+            .map(|(x, y)| Wall { x, y, dir: Down });
 
         let iter = left_edge_iter
             .chain(top_edge_iter)

@@ -1,6 +1,7 @@
 use nannou::prelude::*;
 
 use crate::maze::{Maze, Wall};
+use crate::maze::wall::Direction::*;
 
 pub struct Draw<'a> {
     draw: &'a nannou::Draw,
@@ -30,17 +31,17 @@ impl<'a> Draw<'a> {
 
         let maze_rect = Rect::from_w_h(maze_width, maze_height);
 
-        let (x, y) = wall.xy();
+        let &Wall {x, y, ..} = wall;
         let cell = Rect::from_w_h(self.wall_length, self.wall_length)
             .top_left_of(maze_rect)
             .shift_x(x as f32 * self.wall_length)
             .shift_y(y as f32 * -self.wall_length);
 
-        let (start, end) = match wall {
-            Wall::Up { x: _, y: _ } => (cell.top_left(), cell.top_right()),
-            Wall::Down { x: _, y: _ } => (cell.bottom_left(), cell.bottom_right()),
-            Wall::Left { x: _, y: _ } => (cell.top_left(), cell.bottom_left()),
-            Wall::Right { x: _, y: _ } => (cell.top_right(), cell.bottom_right()),
+        let (start, end) = match wall.dir {
+            Up => (cell.top_left(), cell.top_right()),
+            Down => (cell.bottom_left(), cell.bottom_right()),
+            Left => (cell.top_left(), cell.bottom_left()),
+            Right => (cell.top_right(), cell.bottom_right()),
         };
 
         self.draw.line()
