@@ -39,8 +39,12 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
 
 fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
+    draw.background().color(rgb8(0x07, 0x10, 0x13));
 
     model.animator.draw(&draw);
+
+    draw.text(&(app.fps() as i32).to_string())
+        .xy(app.window_rect().pad(15.0).top_right());
 
     draw.to_frame(app, &frame).unwrap();
 }
