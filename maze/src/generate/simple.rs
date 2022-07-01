@@ -53,6 +53,10 @@ impl MazeGenerator for SimpleGenerator {
     fn initial_maze(&self) -> crate::maze::Maze {
         Maze::new_with_edges(self.width, self.height, false)
     }
+
+    fn name(&self) -> String {
+        "Simple Dummy Algorithm".to_string()
+    }
 }
 
 #[cfg(test)]

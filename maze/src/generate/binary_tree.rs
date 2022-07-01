@@ -49,6 +49,10 @@ impl MazeGenerator for BinaryTreeGenerator {
     fn initial_maze(&self) -> crate::maze::Maze {
         Maze::new_with_edges(self.maze.width(), self.maze.height(), true)
     }
+
+    fn name(&self) -> String {
+        "Binary Tree Algorithm".to_string()
+    }
 }
 
 impl Iterator for BinaryTreeGenerator {
