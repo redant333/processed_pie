@@ -1,4 +1,4 @@
-use crate::maze::Wall;
+use crate::maze::{Wall, Maze};
 use crate::maze::wall::Direction::*;
 
 use super::MazeGenerator;
@@ -48,6 +48,10 @@ impl MazeGenerator for SimpleGenerator {
 
     fn height(&self) -> usize {
         self.height
+    }
+
+    fn initial_maze(&self) -> crate::maze::Maze {
+        Maze::new_with_edges(self.width, self.height, false)
     }
 }
 

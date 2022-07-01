@@ -18,7 +18,7 @@ pub struct Animator<T> {
 
 impl<T> Animator<T> where T: MazeGenerator {
     pub fn new(config: AnimatorConfig, generator: T) -> Animator<T> {
-        let maze = Maze::new_with_edges(generator.width(), generator.height(), false);
+        let maze = generator.initial_maze();
         Animator {
             config,
             generator,
