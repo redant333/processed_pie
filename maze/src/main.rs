@@ -1,10 +1,8 @@
-use maze::animate::{AnimatorConfig, Animator};
+use maze::{animate::{AnimatorConfig, Animator}, generate::{binary_tree::BinaryTreeGenerator}};
 use nannou::prelude::*;
 
-use maze::generate::simple::SimpleGenerator;
-
 struct Model {
-    animator: Animator<SimpleGenerator>,
+    animator: Animator<BinaryTreeGenerator>,
 }
 
 fn main() {
@@ -25,7 +23,7 @@ fn model(app: &App) -> Model {
         wall_color: rgb8(0x01, 0x97, 0xf6),
         wall_size: 32.0,
     };
-    let generator = SimpleGenerator::new(38, 20);
+    let generator = BinaryTreeGenerator::new(38, 20);
     let animator = Animator::new(config, generator);
 
     Model {
