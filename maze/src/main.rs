@@ -22,6 +22,7 @@ fn model(app: &App) -> Model {
         back_color: rgb8(0x07, 0x10, 0x13),
         wall_color: rgb8(0x01, 0x97, 0xf6),
         wall_size: 32.0,
+        y: 8.0,
     };
     let generator = BinaryTreeGenerator::new(38, 20);
     let animator = MazeGenerationAnimator::new(config, generator);

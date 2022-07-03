@@ -7,6 +7,7 @@ pub struct AnimatorConfig {
     pub back_color: Rgb8,
     pub wall_color: Rgb8,
     pub wall_size: f32,
+    pub y: f32,
 }
 
 pub struct MazeGenerationAnimator<T> {
@@ -40,6 +41,8 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
     }
 
     pub fn draw(&self, draw: &Draw) {
+        let draw = draw.x_y(0.0, self.config.y);
+
         let maze_draw = MazeDraw::new(
             &draw,
             &self.maze,
