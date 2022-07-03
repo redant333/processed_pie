@@ -9,17 +9,17 @@ pub struct AnimatorConfig {
     pub wall_size: f32,
 }
 
-pub struct Animator<T> {
+pub struct MazeGenerationAnimator<T> {
     config: AnimatorConfig,
     generator: T,
     maze: Maze,
     frame: u64,
 }
 
-impl<T> Animator<T> where T: MazeGenerator {
-    pub fn new(config: AnimatorConfig, generator: T) -> Animator<T> {
+impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
+    pub fn new(config: AnimatorConfig, generator: T) -> MazeGenerationAnimator<T> {
         let maze = generator.initial_maze();
-        Animator {
+        MazeGenerationAnimator {
             config,
             generator,
             maze,
