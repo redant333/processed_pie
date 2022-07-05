@@ -28,6 +28,14 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
         }
     }
 
+    pub fn top_left_cell(&self) -> (f32, f32) {
+        let x = -(self.maze.width() as f32 * self.config.wall_size / 2.0) +
+            self.config.wall_size / 2.0;
+        let y = (self.maze.height() as f32 * self.config.wall_size / 2.0) -
+            self.config.wall_size / 2.0 + self.config.y;
+        (x, y)
+    }
+
     fn handle_new_wall(&mut self) {
         if let Some((wall, state)) = self.generator.next() {
             self.maze.set_wall(&wall, state);
