@@ -14,7 +14,7 @@ pub struct MazeGenerationAnimator<T> {
     config: AnimatorConfig,
     generator: T,
     maze: Maze,
-    frame: u64,
+    pub maze_completed: bool,
 }
 
 impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
@@ -24,7 +24,7 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
             config,
             generator,
             maze,
-            frame: 0,
+            maze_completed: false,
         }
     }
 
@@ -36,16 +36,24 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
         (x, y)
     }
 
+    pub fn get_maze(&self) -> Option<&Maze> {
+        if self.maze_completed {
+            Some(&self.maze)
+        } else {
+            None
+        }
+    }
+
     fn handle_new_wall(&mut self) {
         if let Some((wall, state)) = self.generator.next() {
             self.maze.set_wall(&wall, state);
+        } else {
+            self.maze_completed = true;
         }
     }
 
     pub fn update(&mut self) {
-        if self.frame % 10 == 0 {
-            self.handle_new_wall();
-        }
+        self.handle_new_wall();
     }
 
     pub fn draw(&self, draw: &Draw) {
