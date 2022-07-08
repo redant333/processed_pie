@@ -1,7 +1,5 @@
 use crate::maze::{Wall, Maze};
 
-mod simple;
-
 mod binary_tree;
 pub use binary_tree::*;
 
