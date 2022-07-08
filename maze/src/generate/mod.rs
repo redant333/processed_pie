@@ -1,8 +1,12 @@
 use crate::maze::{Wall, Maze};
 
-pub mod simple;
-pub mod binary_tree;
-pub mod recursive_division;
+mod simple;
+
+mod binary_tree;
+pub use binary_tree::*;
+
+mod recursive_division;
+pub use recursive_division::*;
 
 pub trait MazeGenerator: Iterator<Item = (Wall, bool)> {
     fn width(&self) -> usize;

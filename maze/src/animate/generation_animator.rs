@@ -1,7 +1,9 @@
-use nannou::{color::Rgb8, Draw};
+use nannou::prelude::*;
 
-use crate::{maze::Maze, generate::MazeGenerator};
 use crate::draw::Draw as MazeDraw;
+use crate::{generate::MazeGenerator, maze::Maze};
+
+use super::Animator;
 
 pub struct AnimatorConfig {
     pub back_color: Rgb8,
@@ -17,7 +19,40 @@ pub struct MazeGenerationAnimator<T> {
     pub maze_completed: bool,
 }
 
-impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
+impl<T> Animator for MazeGenerationAnimator<T>
+where
+    T: MazeGenerator,
+{
+    fn update(&mut self) -> () {
+        self.handle_new_wall();
+    }
+
+    fn draw(&self, draw: &Draw, _window: &Rect) -> () {
+        let draw = draw.x_y(0.0, self.config.y);
+
+        draw.background().color(self.config.back_color);
+
+        let maze_draw = MazeDraw::new(
+            &draw,
+            &self.maze,
+            self.config.wall_color,
+            self.config.wall_size,
+        );
+
+        for wall in self.maze.wall_iter() {
+            maze_draw.wall(&wall);
+        }
+    }
+
+    fn done(&self) -> bool {
+        self.maze_completed
+    }
+}
+
+impl<T> MazeGenerationAnimator<T>
+where
+    T: MazeGenerator,
+{
     pub fn new(config: AnimatorConfig, generator: T) -> MazeGenerationAnimator<T> {
         let maze = generator.initial_maze();
         MazeGenerationAnimator {
@@ -29,10 +64,11 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
     }
 
     pub fn top_left_cell(&self) -> (f32, f32) {
-        let x = -(self.maze.width() as f32 * self.config.wall_size / 2.0) +
-            self.config.wall_size / 2.0;
-        let y = (self.maze.height() as f32 * self.config.wall_size / 2.0) -
-            self.config.wall_size / 2.0 + self.config.y;
+        let x =
+            -(self.maze.width() as f32 * self.config.wall_size / 2.0) + self.config.wall_size / 2.0;
+        let y = (self.maze.height() as f32 * self.config.wall_size / 2.0)
+            - self.config.wall_size / 2.0
+            + self.config.y;
         (x, y)
     }
 
@@ -49,24 +85,6 @@ impl<T> MazeGenerationAnimator<T> where T: MazeGenerator {
             self.maze.set_wall(&wall, state);
         } else {
             self.maze_completed = true;
-        }
-    }
-
-    pub fn update(&mut self) {
-        self.handle_new_wall();
-    }
-
-    pub fn draw(&self, draw: &Draw) {
-        let draw = draw.x_y(0.0, self.config.y);
-
-        let maze_draw = MazeDraw::new(
-            &draw,
-            &self.maze,
-            self.config.wall_color,
-            self.config.wall_size);
-
-        for wall in self.maze.wall_iter() {
-            maze_draw.wall(&wall);
         }
     }
 }
