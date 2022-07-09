@@ -13,7 +13,6 @@ where
 {
     generation_animator: MazeGenerationAnimator<T>,
     solution_animator: Option<MazeSolutionAnimator>,
-    done: bool,
 }
 
 impl<T> MazeAnimator<T>
@@ -35,7 +34,6 @@ where
         Self {
             generation_animator,
             solution_animator: None,
-            done: false,
         }
     }
 }
@@ -66,11 +64,15 @@ where
         self.generation_animator.draw(draw, window);
 
         if let Some(solution_animator) = self.solution_animator.as_ref() {
-            solution_animator.draw(draw);
+            solution_animator.draw(draw, window);
         }
     }
 
     fn done(&self) -> bool {
-        self.done
+        if let Some(solution) = self.solution_animator.as_ref() {
+            solution.done()
+        } else {
+            false
+        }
     }
 }
