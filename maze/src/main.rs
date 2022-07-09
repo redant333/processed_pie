@@ -5,6 +5,10 @@ use std::process::exit;
 use maze::animate::*;
 use maze::generate::*;
 
+const MAZE_WIDTH: usize = 38;
+const MAZE_HEIGHT: usize = 20;
+const SCENE_TIMEOUT: u32 = 60;
+
 struct Model {
     animators: VecDeque<Box<dyn Animator>>,
     current_animator: Box<dyn Animator>,
@@ -12,6 +16,15 @@ struct Model {
 
 fn main() {
     nannou::app(model).update(update).run();
+}
+
+fn add_generator<T: 'static>(animators: &mut VecDeque<Box<dyn Animator>>, generator: T)
+where
+    T: MazeGenerator,
+{
+    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
+    animators.push_back(animator);
+    animators.push_back(Box::new(WaitingAnimator::new(SCENE_TIMEOUT)));
 }
 
 fn model(app: &App) -> Model {
@@ -25,17 +38,18 @@ fn model(app: &App) -> Model {
 
     let mut animators = VecDeque::new();
 
-    let generator = KruskalsGenerator::new(38, 20);
-    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
-    animators.push_back(animator);
-
-    let generator = BinaryTreeGenerator::new(38, 20);
-    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
-    animators.push_back(animator);
-
-    let generator = RecursiveDivisionGenerator::new(38, 20);
-    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
-    animators.push_back(animator);
+    add_generator(
+        &mut animators,
+        KruskalsGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+    );
+    add_generator(
+        &mut animators,
+        BinaryTreeGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+    );
+    add_generator(
+        &mut animators,
+        RecursiveDivisionGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+    );
 
     let current_animator = animators.pop_front().unwrap();
 

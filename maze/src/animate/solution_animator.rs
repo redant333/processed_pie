@@ -50,37 +50,45 @@ impl Animator for MazeSolutionAnimator {
 
         let solution_len = self.solution.as_ref().unwrap().len();
 
+        if self.lines_to_skip > solution_len {
+            self.done = true;
+            return;
+        }
+
         if self.lines_to_draw <= solution_len {
             self.lines_to_draw += 1;
         } else if self.lines_to_skip <= solution_len {
             self.lines_to_skip += 1;
-
-            if self.lines_to_skip > solution_len {
-                self.done = true;
-            }
         }
     }
 
     fn draw(&self, draw: &Draw, _window: &Rect) {
-        let mut start = self.maze_pos_to_xy_pos(self.config.start);
-
         if let Some(solution) = self.solution.as_ref() {
-            let mut points = solution
+            let points = solution
                 .iter()
                 .map(|&(x, y)| self.maze_pos_to_xy_pos((x, y)))
                 .skip(self.lines_to_skip)
                 .take(self.lines_to_draw)
                 .peekable();
 
-            if let Some(first) = points.peek() {
-                start = *first;
-            }
-
             draw.polyline()
                 .color(self.config.color)
                 .weight(self.config.line_weight)
                 .points(points);
         }
+
+        let start = if self.solution.is_none() {
+            self.maze_pos_to_xy_pos(self.config.start)
+        } else {
+            let cell = self
+                .solution
+                .as_ref()
+                .unwrap()
+                .get(self.lines_to_skip)
+                .unwrap_or(&self.config.end);
+
+            self.maze_pos_to_xy_pos(*cell)
+        };
 
         draw.ellipse()
             .w_h(self.config.dot_size, self.config.dot_size)

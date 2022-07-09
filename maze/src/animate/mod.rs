@@ -1,8 +1,11 @@
 mod generation_animator;
 mod solution_animator;
 
-pub mod maze_animator;
+mod maze_animator;
 pub use maze_animator::*;
+
+mod waiting_animator;
+pub use waiting_animator::*;
 
 use nannou::prelude::*;
 
