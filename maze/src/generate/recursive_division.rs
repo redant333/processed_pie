@@ -178,14 +178,14 @@ impl Iterator for RecursiveDivisionGenerator {
     type Item = (Wall, bool);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.pending_stack.is_empty() {
+        while self.pending_stack.is_empty() {
             let field = self.field_stack.pop()?;
 
             if field.width > field.height {
-                self.split_vertically(field);
+                self.split_vertically(field)
             } else {
-                self.split_horizontally(field);
-            }
+                self.split_horizontally(field)
+            };
         }
 
         self.pending_stack.pop()
