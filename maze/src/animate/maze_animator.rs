@@ -3,7 +3,7 @@ use nannou::prelude::*;
 
 use super::{
     generation_animator::{AnimatorConfig, MazeGenerationAnimator},
-    solution_animator::MazeSolutionAnimator,
+    solution_animator::{MazeSolutionAnimator, SolutionAnimatorConfig},
     Animator,
 };
 
@@ -12,7 +12,7 @@ where
     T: MazeGenerator,
 {
     generation_animator: MazeGenerationAnimator<T>,
-    solution_animator: Option<MazeSolutionAnimator>,
+    solution_animator: MazeSolutionAnimator,
 }
 
 impl<T> MazeAnimator<T>
@@ -29,11 +29,22 @@ where
             wall_size: 32.0,
             y: 8.0,
         };
-
         let generation_animator = MazeGenerationAnimator::new(config, generator);
+
+        let config = SolutionAnimatorConfig {
+            wall_size: 32.0,
+            dot_size: 18.0,
+            top_left: generation_animator.top_left_cell(),
+            start: (0, 0),
+            end: (37, 19),
+            color: rgb(0xa5, 0x24, 0x22),
+            line_weight: 5.0,
+        };
+        let solution_animator = MazeSolutionAnimator::new(config);
+
         Self {
             generation_animator,
-            solution_animator: None,
+            solution_animator,
         }
     }
 }
@@ -43,36 +54,23 @@ where
     T: MazeGenerator,
 {
     fn update(&mut self) {
-        if self.generation_animator.done() && self.solution_animator.is_none() {
-            self.solution_animator = Some(MazeSolutionAnimator::new(
-                self.generation_animator.get_maze().unwrap(),
-                32.0,
-                self.generation_animator.top_left_cell(),
-                (0, 0),
-                (37, 19),
-            ));
+        if self.generation_animator.done() {
+            self.solution_animator.set_maze(self.generation_animator.get_maze().unwrap());
         }
 
         if !self.generation_animator.done() {
             self.generation_animator.update();
         } else {
-            self.solution_animator.as_mut().unwrap().update();
+            self.solution_animator.update();
         }
     }
 
     fn draw(&self, draw: &Draw, window: &Rect) {
         self.generation_animator.draw(draw, window);
-
-        if let Some(solution_animator) = self.solution_animator.as_ref() {
-            solution_animator.draw(draw, window);
-        }
+        self.solution_animator.draw(draw, window);
     }
 
     fn done(&self) -> bool {
-        if let Some(solution) = self.solution_animator.as_ref() {
-            solution.done()
-        } else {
-            false
-        }
+        self.solution_animator.done()
     }
 }

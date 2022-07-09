@@ -63,13 +63,13 @@ where
         }
     }
 
-    pub fn top_left_cell(&self) -> (f32, f32) {
+    pub fn top_left_cell(&self) -> Vec2 {
         let x =
             -(self.maze.width() as f32 * self.config.wall_size / 2.0) + self.config.wall_size / 2.0;
         let y = (self.maze.height() as f32 * self.config.wall_size / 2.0)
             - self.config.wall_size / 2.0
             + self.config.y;
-        (x, y)
+        pt2(x, y)
     }
 
     pub fn get_maze(&self) -> Option<&Maze> {
