@@ -25,6 +25,10 @@ fn model(app: &App) -> Model {
 
     let mut animators = VecDeque::new();
 
+    let generator = KruskalsGenerator::new(38, 20);
+    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
+    animators.push_back(animator);
+
     let generator = BinaryTreeGenerator::new(38, 20);
     let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
     animators.push_back(animator);

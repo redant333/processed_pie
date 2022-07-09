@@ -6,6 +6,9 @@ pub use binary_tree::*;
 mod recursive_division;
 pub use recursive_division::*;
 
+mod kruskal;
+pub use kruskal::*;
+
 pub trait MazeGenerator: Iterator<Item = (Wall, bool)> {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
