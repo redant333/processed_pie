@@ -52,6 +52,7 @@ impl<'a> Draw<'a> {
             .start(start)
             .end(end)
             .color(self.color)
+            .caps_round()
             .weight(3.0);
     }
 }

@@ -74,6 +74,7 @@ impl Animator for MazeSolutionAnimator {
             draw.polyline()
                 .color(self.config.color)
                 .weight(self.config.line_weight)
+                .caps_round()
                 .points(points);
         }
 
