@@ -40,6 +40,10 @@ fn model(app: &App) -> Model {
 
     add_generator(
         &mut animators,
+        RecursiveBacktrackingGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+    );
+    add_generator(
+        &mut animators,
         KruskalsGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
     );
     add_generator(

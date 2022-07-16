@@ -9,6 +9,9 @@ pub use recursive_division::*;
 mod kruskal;
 pub use kruskal::*;
 
+mod recursive_backtracking;
+pub use recursive_backtracking::*;
+
 pub trait MazeGenerator: Iterator<Item = (Wall, bool)> {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
