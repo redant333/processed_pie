@@ -1,6 +1,9 @@
 use nannou::prelude::*;
 use std::collections::VecDeque;
+use std::path::PathBuf;
 use std::process::exit;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
 use maze::animate::*;
 use maze::generate::*;
@@ -8,10 +11,12 @@ use maze::generate::*;
 const MAZE_WIDTH: usize = 38;
 const MAZE_HEIGHT: usize = 20;
 const SCENE_TIMEOUT: u32 = 60;
+const EXPORTING: bool = false;
 
 struct Model {
     animators: VecDeque<Box<dyn Animator>>,
     current_animator: Box<dyn Animator>,
+    frames_folder: PathBuf,
 }
 
 fn main() {
@@ -25,6 +30,17 @@ where
     let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
     animators.push_back(animator);
     animators.push_back(Box::new(WaitingAnimator::new(SCENE_TIMEOUT)));
+}
+
+fn get_frames_folder(app: &App) -> PathBuf {
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("Could not get timestamp")
+        .as_millis();
+
+    app.project_path()
+        .expect("Could not get project_path")
+        .join(format!("frames_{}", timestamp))
 }
 
 fn model(app: &App) -> Model {
@@ -60,6 +76,7 @@ fn model(app: &App) -> Model {
     Model {
         animators,
         current_animator,
+        frames_folder: get_frames_folder(app),
     }
 }
 
@@ -80,8 +97,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     model.current_animator.draw(&draw, &window);
 
-    draw.text(&(app.fps() as i32).to_string())
-        .xy(app.window_rect().pad(15.0).top_right());
-
     draw.to_frame(app, &frame).unwrap();
+
+    if EXPORTING {
+        let file = format!("frame_{}.png", frame.nth());
+        app.main_window()
+            .capture_frame(model.frames_folder.join(file));
+    }
 }
