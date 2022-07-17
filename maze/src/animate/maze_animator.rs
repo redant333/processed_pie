@@ -19,7 +19,7 @@ impl<T> MazeAnimator<T>
 where
     T: MazeGenerator,
 {
-    pub fn new(generator: T) -> Self
+    pub fn new(generator: T, start: (usize, usize), end: (usize, usize)) -> Self
     where
         T: MazeGenerator,
     {
@@ -35,8 +35,8 @@ where
             wall_size: 32.0,
             dot_size: 18.0,
             top_left: generation_animator.top_left_cell(),
-            start: (0, 0),
-            end: (37, 19),
+            start,
+            end,
             color: rgb(0xa5, 0x24, 0x22),
             line_weight: 5.0,
         };

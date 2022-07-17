@@ -23,11 +23,15 @@ fn main() {
     nannou::app(model).update(update).run();
 }
 
-fn add_generator<T: 'static>(animators: &mut VecDeque<Box<dyn Animator>>, generator: T)
-where
+fn add_generator<T: 'static>(
+    animators: &mut VecDeque<Box<dyn Animator>>,
+    generator: T,
+    start: (usize, usize),
+    end: (usize, usize),
+) where
     T: MazeGenerator,
 {
-    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator));
+    let animator: Box<dyn Animator> = Box::new(MazeAnimator::new(generator, start, end));
     animators.push_back(animator);
     animators.push_back(Box::new(WaitingAnimator::new(SCENE_TIMEOUT)));
 }
@@ -57,18 +61,26 @@ fn model(app: &App) -> Model {
     add_generator(
         &mut animators,
         RecursiveBacktrackingGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+        (0, 0),
+        (MAZE_WIDTH - 1, MAZE_HEIGHT - 1),
     );
     add_generator(
         &mut animators,
         KruskalsGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+        (MAZE_WIDTH - 1, MAZE_HEIGHT - 1),
+        (0, 0),
     );
     add_generator(
         &mut animators,
         BinaryTreeGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+        (0, 0),
+        (MAZE_WIDTH - 1, MAZE_HEIGHT - 1),
     );
     add_generator(
         &mut animators,
         RecursiveDivisionGenerator::new(MAZE_WIDTH, MAZE_HEIGHT),
+        (MAZE_WIDTH - 1, MAZE_HEIGHT - 1),
+        (0, 0),
     );
 
     let current_animator = animators.pop_front().unwrap();
