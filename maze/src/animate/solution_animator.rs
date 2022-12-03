@@ -71,11 +71,13 @@ impl Animator for MazeSolutionAnimator {
                 .take(self.lines_to_draw)
                 .peekable();
 
-            draw.polyline()
-                .color(self.config.color)
-                .weight(self.config.line_weight)
-                .caps_round()
-                .points(points);
+            if points.len() > 0 {
+                draw.polyline()
+                    .color(self.config.color)
+                    .weight(self.config.line_weight)
+                    .caps_round()
+                    .points(points);
+            }
         }
 
         let start = if self.solution.is_none() {
