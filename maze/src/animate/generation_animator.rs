@@ -16,6 +16,7 @@ pub struct MazeGenerationAnimator<T> {
     config: AnimatorConfig,
     generator: T,
     maze: Maze,
+    first_frame: bool,
     pub maze_completed: bool,
 }
 
@@ -24,7 +25,11 @@ where
     T: MazeGenerator,
 {
     fn update(&mut self) -> () {
-        self.handle_new_wall();
+        if !self.first_frame {
+            self.handle_new_wall();
+        } else {
+            self.first_frame = false;
+        }
     }
 
     fn draw(&self, draw: &Draw, _window: &Rect) -> () {
@@ -59,6 +64,7 @@ where
             config,
             generator,
             maze,
+            first_frame: true,
             maze_completed: false,
         }
     }
