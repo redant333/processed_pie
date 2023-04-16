@@ -14,6 +14,7 @@ where
     generation_animator: MazeGenerationAnimator<T>,
     solution_animator: MazeSolutionAnimator,
     generator_name: String,
+    begin_counter: u32,
 }
 
 impl<T> MazeAnimator<T>
@@ -30,6 +31,7 @@ where
             wall_size: 32.0,
             y: 8.0,
         };
+        let begin_counter = 48;
         let generator_name = generator.name();
         let generation_animator = MazeGenerationAnimator::new(config, generator);
 
@@ -48,6 +50,7 @@ where
             generation_animator,
             solution_animator,
             generator_name,
+            begin_counter,
         }
     }
 }
@@ -57,6 +60,11 @@ where
     T: MazeGenerator,
 {
     fn update(&mut self) {
+        if self.begin_counter > 0 {
+            self.begin_counter -= 1;
+            return;
+        }
+
         if self.generation_animator.done() {
             self.solution_animator
                 .set_maze(self.generation_animator.get_maze().unwrap());
