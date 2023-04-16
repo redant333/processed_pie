@@ -13,6 +13,7 @@ where
 {
     generation_animator: MazeGenerationAnimator<T>,
     solution_animator: MazeSolutionAnimator,
+    generator_name: String,
 }
 
 impl<T> MazeAnimator<T>
@@ -29,6 +30,7 @@ where
             wall_size: 32.0,
             y: 8.0,
         };
+        let generator_name = generator.name();
         let generation_animator = MazeGenerationAnimator::new(config, generator);
 
         let config = SolutionAnimatorConfig {
@@ -45,6 +47,7 @@ where
         Self {
             generation_animator,
             solution_animator,
+            generator_name,
         }
     }
 }
@@ -55,7 +58,8 @@ where
 {
     fn update(&mut self) {
         if self.generation_animator.done() {
-            self.solution_animator.set_maze(self.generation_animator.get_maze().unwrap());
+            self.solution_animator
+                .set_maze(self.generation_animator.get_maze().unwrap());
         }
 
         if !self.generation_animator.done() {
@@ -68,6 +72,12 @@ where
     fn draw(&self, draw: &Draw, window: &Rect) {
         self.generation_animator.draw(draw, window);
         self.solution_animator.draw(draw, window);
+
+        draw.text(&self.generator_name)
+            .xy(window.pad_bottom(30.0).mid_bottom())
+            .w(window.w())
+            .color(rgb8(0xcc, 0xc4, 0xbc))
+            .font_size(30);
     }
 
     fn done(&self) -> bool {
